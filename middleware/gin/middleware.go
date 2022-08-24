@@ -55,7 +55,7 @@ func (g *Middleware) Use() func(c *gin.Context) {
 			return
 		}
 		if g.Config.Debug {
-			g.Config.Logger.Printf("[opa-middleware-gin] Result: %s", result)
+			g.Config.Logger.Printf("[opa-middleware-gin] Result: %t", result)
 		}
 		if result != g.Config.ExceptedResult {
 			c.AbortWithStatus(g.Config.DeniedStatusCode)

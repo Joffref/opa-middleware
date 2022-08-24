@@ -51,7 +51,7 @@ func (g *Middleware) Use() func(c *fiber.Ctx) error {
 
 		}
 		if g.Config.Debug {
-			g.Config.Logger.Printf("[opa-middleware-fiber] Result: %s", result)
+			g.Config.Logger.Printf("[opa-middleware-fiber] Result: %t", result)
 		}
 		if result != g.Config.ExceptedResult {
 			c.Status(g.Config.DeniedStatusCode)
