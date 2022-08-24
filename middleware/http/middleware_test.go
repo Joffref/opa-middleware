@@ -8,7 +8,18 @@ import (
 	"testing"
 )
 
+var Policy = `
+package policy
+
+default allow = false
+
+allow {
+	input.path = "/api/v1/users"
+	input.method = "GET"
+}`
+
 func TestHTTPMiddleware_Query(t *testing.T) {
+	// Might be flaky if due to request context usage.
 	type fields struct {
 		Config *config.Config
 		Next   http.Handler
@@ -23,7 +34,37 @@ func TestHTTPMiddleware_Query(t *testing.T) {
 		want    bool
 		wantErr bool
 	}{
-		// TODO: Add test cases.
+		{
+			name: "Test HTTPMiddleware_Query",
+			fields: fields{
+				Config: &config.Config{
+					Policy: Policy,
+					Query:  "data.policy.allow",
+					InputCreationMethod: func(r *http.Request) (map[string]interface{}, error) {
+						return map[string]interface{}{
+							"path":   r.URL.Path,
+							"method": r.Method,
+						}, nil
+					},
+					ExceptedResult:   true,
+					DeniedStatusCode: 403,
+					DeniedMessage:    "Forbidden",
+				},
+				Next: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					w.WriteHeader(http.StatusOK)
+				}),
+			},
+			args: args{
+				req: &http.Request{
+					URL: &url.URL{
+						Path: "/api/v1/users",
+					},
+					Method: "GET",
+				},
+			},
+			want:    true,
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -44,15 +85,6 @@ func TestHTTPMiddleware_Query(t *testing.T) {
 }
 
 func TestHTTPMiddleware_ServeHTTP(t *testing.T) {
-	policy := `
-package policy
-
-default allow = false
-
-allow {
-	input.path = "/api/v1/users"
-	input.method = "GET"
-}`
 	type fields struct {
 		Config *config.Config
 		Next   http.Handler
@@ -70,7 +102,7 @@ allow {
 			name: "Test HTTPMiddleware_ServeHTTP",
 			fields: fields{
 				Config: &config.Config{
-					Policy: policy,
+					Policy: Policy,
 					Query:  "data.policy.allow",
 					InputCreationMethod: func(r *http.Request) (map[string]interface{}, error) {
 						return map[string]interface{}{
