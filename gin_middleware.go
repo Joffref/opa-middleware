@@ -61,6 +61,7 @@ func (g *GinMiddleware) Use() func(c *gin.Context) {
 			c.AbortWithStatus(g.Config.DeniedStatusCode)
 			return
 		}
+		c.Next()
 	}
 }
 
