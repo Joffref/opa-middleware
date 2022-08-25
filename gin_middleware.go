@@ -51,14 +51,14 @@ func (g *GinMiddleware) Use() func(c *gin.Context) {
 			if g.Config.Debug {
 				g.Config.Logger.Printf("[opa-middleware-gin] Error: %s", err.Error())
 			}
-			c.AbortWithStatus(http.StatusInternalServerError)
+			c.AbortWithError(http.StatusInternalServerError, err)
 			return
 		}
 		if g.Config.Debug {
 			g.Config.Logger.Printf("[opa-middleware-gin] Result: %t", result)
 		}
 		if result != g.Config.ExceptedResult {
-			c.AbortWithStatus(g.Config.DeniedStatusCode)
+			c.AbortWithError(g.Config.DeniedStatusCode, errors.New(g.Config.DeniedMessage))
 			return
 		}
 		c.Next()
