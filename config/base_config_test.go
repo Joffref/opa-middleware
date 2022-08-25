@@ -18,7 +18,7 @@ func TestConfig_Validate(t *testing.T) {
 		ExceptedResult      bool
 		DeniedStatusCode    int
 		DeniedMessage       string
-		Headers             map[string]string
+		Headers             map[string][]string
 		IgnoredHeaders      []string
 		Debug               bool
 		Logger              *log.Logger
@@ -40,8 +40,8 @@ func TestConfig_Validate(t *testing.T) {
 				ExceptedResult:   true,
 				DeniedStatusCode: http.StatusForbidden,
 				DeniedMessage:    "Forbidden",
-				Headers: map[string]string{
-					"Content-Type": "application/json",
+				Headers: map[string][]string{
+					"Content-Type": {"application/json"},
 				},
 				IgnoredHeaders: []string{
 					"Content-Type",
@@ -62,8 +62,8 @@ func TestConfig_Validate(t *testing.T) {
 				ExceptedResult:   true,
 				DeniedStatusCode: http.StatusForbidden,
 				DeniedMessage:    "Forbidden",
-				Headers: map[string]string{
-					"Content-Type": "application/json",
+				Headers: map[string][]string{
+					"Content-Type": {"application/json"},
 				},
 			},
 			wantErr: true,
@@ -78,8 +78,8 @@ func TestConfig_Validate(t *testing.T) {
 				ExceptedResult:   true,
 				DeniedStatusCode: http.StatusForbidden,
 				DeniedMessage:    "Forbidden",
-				Headers: map[string]string{
-					"Content-Type": "application/json",
+				Headers: map[string][]string{
+					"Content-Type": {"application/json"},
 				},
 			},
 			wantErr: true,
@@ -94,8 +94,8 @@ func TestConfig_Validate(t *testing.T) {
 				ExceptedResult:   true,
 				DeniedStatusCode: http.StatusForbidden,
 				DeniedMessage:    "Forbidden",
-				Headers: map[string]string{
-					"Content-Type": "application/json",
+				Headers: map[string][]string{
+					"Content-Type": {"application/json"},
 				},
 				IgnoredHeaders: []string{
 					"Content-Type",
