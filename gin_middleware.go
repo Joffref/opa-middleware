@@ -1,4 +1,4 @@
-package ginmiddleware
+package opamiddleware
 
 import (
 	"errors"
@@ -8,16 +8,16 @@ import (
 	"net/http"
 )
 
-type InputCreationMethod func(c *gin.Context) (map[string]interface{}, error)
+type GinInputCreationMethod func(c *gin.Context) (map[string]interface{}, error)
 
-type Middleware struct {
+type GinMiddleware struct {
 	Config *config.Config
 	// BindingMethod is a function that returns the value to be sent to the OPA server.
-	InputCreationMethod InputCreationMethod `json:"binding_method,omitempty"`
+	InputCreationMethod GinInputCreationMethod `json:"binding_method,omitempty"`
 }
 
 // NewGinMiddleware is the constructor for the opa gin middleware.
-func NewGinMiddleware(cfg *config.Config, input InputCreationMethod) (*Middleware, error) {
+func NewGinMiddleware(cfg *config.Config, input GinInputCreationMethod) (*GinMiddleware, error) {
 	err := cfg.Validate()
 	if err != nil {
 		return nil, err
@@ -34,14 +34,14 @@ func NewGinMiddleware(cfg *config.Config, input InputCreationMethod) (*Middlewar
 			return bind, nil
 		}
 	}
-	return &Middleware{
+	return &GinMiddleware{
 		Config:              cfg,
 		InputCreationMethod: input,
 	}, nil
 }
 
 // Use returns the handler for the middleware that is used by gin to evaluate the request against the policy.
-func (g *Middleware) Use() func(c *gin.Context) {
+func (g *GinMiddleware) Use() func(c *gin.Context) {
 	return func(c *gin.Context) {
 		if g.Config.Debug {
 			g.Config.Logger.Printf("[opa-middleware-gin] Request: %s", c.Request.URL.String())
@@ -64,7 +64,7 @@ func (g *Middleware) Use() func(c *gin.Context) {
 	}
 }
 
-func (g *Middleware) query(c *gin.Context) (bool, error) {
+func (g *GinMiddleware) query(c *gin.Context) (bool, error) {
 	bind, err := g.InputCreationMethod(c)
 	if err != nil {
 		return !g.Config.ExceptedResult, err

@@ -1,4 +1,4 @@
-package httpmiddleware
+package opamiddleware
 
 import (
 	"github.com/Joffref/opa-middleware/config"

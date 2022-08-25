@@ -1,4 +1,4 @@
-package fibermiddleware
+package opamiddleware
 
 import (
 	"errors"
@@ -10,17 +10,17 @@ import (
 )
 
 // InputCreationMethod is the method that is used to create the input for the policy.
-type InputCreationMethod func(c *fiber.Ctx) (map[string]interface{}, error)
+type FiberInputCreationMethod func(c *fiber.Ctx) (map[string]interface{}, error)
 
-type Middleware struct {
+type FiberMiddleware struct {
 	// Config is the configuration for the middleware.
 	Config *config.Config
 	// InputCreationMethod is a function that returns the value to be sent to the OPA server.
-	InputCreationMethod InputCreationMethod `json:"binding_method,omitempty"`
+	InputCreationMethod FiberInputCreationMethod `json:"binding_method,omitempty"`
 }
 
 // NewFiberMiddleware is the constructor for the opa fiber middleware.
-func NewFiberMiddleware(cfg *config.Config, input InputCreationMethod) (*Middleware, error) {
+func NewFiberMiddleware(cfg *config.Config, input FiberInputCreationMethod) (*FiberMiddleware, error) {
 	err := cfg.Validate()
 	if err != nil {
 		return nil, err
@@ -30,14 +30,14 @@ func NewFiberMiddleware(cfg *config.Config, input InputCreationMethod) (*Middlew
 			return nil, errors.New("[opa-middleware-fiber] InputCreationMethod must be provided")
 		}
 	}
-	return &Middleware{
+	return &FiberMiddleware{
 		Config:              cfg,
 		InputCreationMethod: input,
 	}, nil
 }
 
 // Use returns the handler for the middleware that is used by fiber to evaluate the request against the policy.
-func (g *Middleware) Use() func(c *fiber.Ctx) error {
+func (g *FiberMiddleware) Use() func(c *fiber.Ctx) error {
 	return func(c *fiber.Ctx) error {
 		if g.Config.Debug {
 			g.Config.Logger.Printf("[opa-middleware-fiber] Request: %s", c.Request().URI())
@@ -65,7 +65,7 @@ func (g *Middleware) Use() func(c *fiber.Ctx) error {
 	}
 }
 
-func (g *Middleware) query(c *fiber.Ctx) (bool, error) {
+func (g *FiberMiddleware) query(c *fiber.Ctx) (bool, error) {
 	bind, err := g.InputCreationMethod(c)
 	if err != nil {
 		return !g.Config.ExceptedResult, err
