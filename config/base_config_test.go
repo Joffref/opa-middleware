@@ -85,24 +85,6 @@ func TestConfig_Validate(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "invalid config given no input creation method",
-			fields: fields{
-				URL:              "http://localhost:8080",
-				Query:            "data.test.allow",
-				ExceptedResult:   true,
-				DeniedStatusCode: http.StatusForbidden,
-				DeniedMessage:    "Forbidden",
-				Headers: map[string]string{
-					"Content-Type": "application/json",
-				},
-				IgnoredHeaders: []string{
-					"Content-Type",
-				},
-				Debug: true,
-			},
-			wantErr: true,
-		},
-		{
 			name: "invalid config given no query",
 			fields: fields{
 				URL: "http://localhost:8080",
