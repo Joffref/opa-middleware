@@ -12,7 +12,7 @@ type GinInputCreationMethod func(c *gin.Context) (map[string]interface{}, error)
 
 type GinMiddleware struct {
 	Config *config.Config
-	// BindingMethod is a function that returns the value to be sent to the OPA server.
+	// InputCreationMethod is a function that returns the value to be sent to the OPA server.
 	InputCreationMethod GinInputCreationMethod `json:"binding_method,omitempty"`
 }
 

@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-// InputCreationMethod is the method that is used to create the input for the policy.
+// FiberInputCreationMethod is the method that is used to create the input for the policy.
 type FiberInputCreationMethod func(c *fiber.Ctx) (map[string]interface{}, error)
 
 type FiberMiddleware struct {
