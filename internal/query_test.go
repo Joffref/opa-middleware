@@ -4,6 +4,7 @@ import (
 	"github.com/Joffref/opa-middleware/config"
 	"net/http"
 	"testing"
+	"time"
 )
 
 func TestQueryPolicy(t *testing.T) {
@@ -33,8 +34,9 @@ allow {
 			args: args{
 				r: &http.Request{},
 				cfg: &config.Config{
-					Policy: policy,
-					Query:  "data.policy.allow",
+					Policy:  policy,
+					Query:   "data.policy.allow",
+					Timeout: 10 * time.Second,
 				},
 				bind: map[string]interface{}{
 					"path":   "/api/v1/users",
@@ -49,8 +51,9 @@ allow {
 			args: args{
 				r: &http.Request{},
 				cfg: &config.Config{
-					Policy: policy,
-					Query:  "data.policy.allow",
+					Policy:  policy,
+					Query:   "data.policy.allow",
+					Timeout: 10 * time.Second,
 				},
 				bind: map[string]interface{}{
 					"path":   "/api/v1/users",
