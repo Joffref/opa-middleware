@@ -38,7 +38,7 @@ type Config struct {
 
 	// Headers is a list of headers to send to the OPA server.
 	// All headers are sent to the OPA server except those in the IgnoredHeaders list.
-	Headers map[string]string `json:"headers,omitempty"`
+	Headers map[string][]string `json:"headers,omitempty"`
 
 	// IgnoredHeaders is a list of headers to ignore when sending to the OPA server.
 	IgnoredHeaders []string `json:"excepted_headers,omitempty"`
@@ -61,7 +61,6 @@ func (c *Config) Validate() error {
 			c.Logger = log.Default()
 		}
 	}
-	c.ExceptedResult = true
 	if c.Timeout == 0 {
 		c.Timeout = 10 * time.Second
 	}

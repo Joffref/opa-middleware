@@ -79,13 +79,17 @@ func (g *FiberMiddleware) query(c *fiber.Ctx) (bool, error) {
 }
 
 func transformFastHTTP(ctx *fasthttp.RequestCtx) *http.Request {
-	req := &http.Request{}
-	headers := make(map[string]string)
+	req := &http.Request{
+		Header: make(http.Header),
+	}
+	headers := make(map[string][]string)
 	ctx.Request.Header.VisitAll(func(key, value []byte) {
-		headers[string(key)] = string(value)
+		headers[string(key)] = append(headers[string(key)], string(value))
 	})
 	for k, v := range headers {
-		req.Header.Set(k, v)
+		for _, vv := range v {
+			req.Header.Add(k, vv)
+		}
 	}
 	req = req.WithContext(ctx)
 	return req

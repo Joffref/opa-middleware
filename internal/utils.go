@@ -12,8 +12,10 @@ func buildHeaders(r *http.Request, cfg *config.Config) (http.Header, error) {
 	for _, header := range cfg.IgnoredHeaders {
 		headers.Del(header)
 	}
-	for header, value := range cfg.Headers {
-		headers.Set(header, value)
+	for header, values := range cfg.Headers {
+		for _, value := range values {
+			headers.Set(header, value)
+		}
 	}
 	return headers, nil
 }

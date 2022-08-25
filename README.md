@@ -18,8 +18,8 @@ go get github.com/Joffref/opa-middleware
 package main
 
 import (
+	"github.com/Joffref/opa-middleware"
 	"github.com/Joffref/opa-middleware/config"
-	"github.com/Joffref/opa-middleware/middleware/http"
 	"net/http"
 )
 
@@ -42,7 +42,7 @@ func (h *H) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	handler, err := httpmiddleware.NewHTTPMiddleware(
+	handler, err := opamiddleware.NewHTTPMiddleware(
 		&config.Config{
 			Policy: Policy,
 			Query:  "data.policy.allow",
@@ -63,7 +63,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	err = http.ListenAndServe(":8080", handler)
+	http.HandleFunc("/", handler.ServeHTTP)
+	err = http.ListenAndServe(":8080", nil)
 	if err != nil {
 		return
 	}
@@ -71,13 +72,13 @@ func main() {
 ```
 
 ### Remote based policy engine
-
+The policy is the same as above, but the policy is stored in a remote server.
 ```go
 package main
 
 import (
+	"github.com/Joffref/opa-middleware"
 	"github.com/Joffref/opa-middleware/config"
-	"github.com/Joffref/opa-middleware/middleware/http"
 	"net/http"
 )
 
@@ -90,10 +91,10 @@ func (h *H) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	handler, err := httpmiddleware.NewHTTPMiddleware(
+	handler, err := opamiddleware.NewHTTPMiddleware(
 		&config.Config{
-			URL:   "http://localhost:8181",
-			Query: "data.policy.allow",
+			URL: "http://localhost:8181/",
+			Query:  "data.policy.allow",
 			InputCreationMethod: func(r *http.Request) (map[string]interface{}, error) {
 				return map[string]interface{}{
 					"path":   r.URL.Path,
@@ -111,7 +112,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	err = http.ListenAndServe(":8080", handler)
+	http.HandleFunc("/", handler.ServeHTTP)
+	err = http.ListenAndServe(":8080", nil)
 	if err != nil {
 		return
 	}
@@ -123,38 +125,38 @@ func main() {
 package main
 
 import (
-    "github.com/Joffref/opa-middleware/config"
-    ginmiddleware "github.com/Joffref/opa-middleware/middleware/gin"
-    "github.com/gin-gonic/gin"
+	"github.com/Joffref/opa-middleware"
+	"github.com/Joffref/opa-middleware/config"
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
-    r := gin.Default()
-    r.GET("/ping", func(c *gin.Context) {
-        c.JSON(200, gin.H{
-            "message": "pong",
-        })
-    })
-    middleware, err := ginmiddleware.NewGinMiddleware(
-        &config.Config{
-            URL:   "https://opa.example.com/",
-            Query: "data.policy.allow",
-        },
-        func(c *gin.Context) (map[string]interface{}, error) {
-            return map[string]interface{}{
-                "path":   c.Request.URL.Path,
-                "method": c.Request.Method,
-            }, nil
-    },
-    )
-    if err != nil {
-        return
-    }
-    r.Use(middleware.Use())
-    err = r.Run(":8080")
-    if err != nil {
-        return
-    }
+	r := gin.Default()
+	middleware, err := opamiddleware.NewGinMiddleware(
+		&config.Config{
+			URL:           "http://localhost:8181/",
+			Query:            "data.policy.allow",
+			ExceptedResult:   true,
+			DeniedStatusCode: 403,
+			DeniedMessage:    "Forbidden",
+		},
+		func(c *gin.Context) (map[string]interface{}, error) {
+			return map[string]interface{}{
+				"path":   c.Request.URL.Path,
+				"method": c.Request.Method,
+			}, nil
+		},
+	)
+	if err != nil {
+		return
+	}
+	r.Use(middleware.Use())
+	r.GET("/ping", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": "pong",
+		})
+	})
+	r.Run(":8080")
 }
 ```
 
@@ -163,35 +165,21 @@ func main() {
 package main
 
 import (
+	"github.com/Joffref/opa-middleware"
 	"github.com/Joffref/opa-middleware/config"
-	fibermiddleware "github.com/Joffref/opa-middleware/middleware/fiber"
 	"github.com/gofiber/fiber/v2"
-	"log"
-	"time"
 )
 
 func main() {
 	app := fiber.New()
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Hello World!")
-	})
-
-	middleware, err := fibermiddleware.NewFiberMiddleware(&config.Config{
-		URL:              "http://localhost:8080/",
-		Query:            "data.policy.allow",
-		DeniedStatusCode: 403,
-		DeniedMessage:    "Forbidden",
-		Headers: map[string]string{
-			"Content-Type": "application/json",
+	middleware, err := opamiddleware.NewFiberMiddleware(
+		&config.Config{
+			URL:           "http://localhost:8181/",
+			Query:            "data.policy.allow",
+			ExceptedResult:   true,
+			DeniedStatusCode: 403,
+			DeniedMessage:    "Forbidden",
 		},
-		IgnoredHeaders: []string{
-			"X-Request-Id",
-		},
-		Debug:          true,
-		Logger:         log.New(log.Writer(), "", log.LstdFlags),
-		ExceptedResult: true,
-		Timeout:        5 * time.Second,
-	},
 		func(c *fiber.Ctx) (map[string]interface{}, error) {
 			return map[string]interface{}{
 				"path":   c.Path(),
@@ -203,9 +191,13 @@ func main() {
 		return
 	}
 	app.Use(middleware.Use())
-	err = app.Listen(":3000")
-	if err != nil {
-		return
-	}
+	app.Get("/ping", func(c *fiber.Ctx) error {
+		err := c.JSON("pong")
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	app.Listen(":8080")
 }
 ```
