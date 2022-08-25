@@ -71,9 +71,6 @@ func (c *Config) Validate() error {
 	if c.URL != "" && c.Policy != "" {
 		return errors.New("[opa-middleware] You must set either URL or Policy")
 	}
-	if c.InputCreationMethod == nil {
-		return errors.New("[opa-middleware] You must set BindingMethod")
-	}
 	if c.ExceptedResult != true && c.ExceptedResult != false {
 		return errors.New("[opa-middleware] You must set ExceptedResult")
 	}
