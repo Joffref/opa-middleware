@@ -40,7 +40,7 @@ func NewFiberMiddleware(cfg *config.Config, input FiberInputCreationMethod) (*Fi
 func (g *FiberMiddleware) Use() func(c *fiber.Ctx) error {
 	return func(c *fiber.Ctx) error {
 		if g.Config.Debug {
-			g.Config.Logger.Printf("[opa-middleware-fiber] Request: %s", c.Request().URI())
+			g.Config.Logger.Printf("[opa-middleware-fiber] Request received")
 		}
 		result, err := g.query(c)
 		if err != nil {

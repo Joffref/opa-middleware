@@ -44,7 +44,7 @@ func NewGinMiddleware(cfg *config.Config, input GinInputCreationMethod) (*GinMid
 func (g *GinMiddleware) Use() func(c *gin.Context) {
 	return func(c *gin.Context) {
 		if g.Config.Debug {
-			g.Config.Logger.Printf("[opa-middleware-gin] Request: %s", c.Request.URL.String())
+			g.Config.Logger.Printf("[opa-middleware-gin] Request received")
 		}
 		result, err := g.query(c)
 		if err != nil {
