@@ -31,7 +31,7 @@ func NewHTTPMiddleware(cfg *config.Config, next http.Handler) (*HTTPMiddleware, 
 // ServeHTTP serves the http request. Act as Use acts in other frameworks.
 func (h *HTTPMiddleware) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	if h.Config.Debug {
-		h.Config.Logger.Printf("[opa-middleware-http] Request: %s", req.URL.String())
+		h.Config.Logger.Printf("[opa-middleware-http] Request received")
 	}
 	result, err := h.query(req)
 	if err != nil {

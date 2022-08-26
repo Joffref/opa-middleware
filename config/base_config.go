@@ -2,7 +2,6 @@ package config
 
 import (
 	"errors"
-	"github.com/open-policy-agent/opa/rego"
 	"log"
 	"net/http"
 	"time"
@@ -18,8 +17,6 @@ type Config struct {
 	// You must set either URL or Policy.
 	Policy string `json:"policy,omitempty"`
 
-	instantiatedPolicy *rego.PreparedEvalQuery
-
 	// Query is the name of the policy to query.
 	Query string `json:"query,omitempty"`
 
@@ -31,13 +28,15 @@ type Config struct {
 	ExceptedResult bool `json:"excepted_result,omitempty"`
 
 	// DeniedStatusCode is the status code that should be returned if the request is denied.
+	// Default to http.StatusForbidden.
 	DeniedStatusCode int `json:"denied_status,omitempty"`
 
 	// DeniedMessage is the message that should be returned if the request is denied.
+	// Default to "Forbidden".
 	DeniedMessage string `json:"denied_message,omitempty"`
 
-	// Headers is a list of headers to send to the OPA server.
-	// All headers are sent to the OPA server except those in the IgnoredHeaders list.
+	// Headers is a list of headers to send to the OPA server in addition.
+	// All headers in the request are sent to the OPA server except those in the IgnoredHeaders list.
 	Headers map[string][]string `json:"headers,omitempty"`
 
 	// IgnoredHeaders is a list of headers to ignore when sending to the OPA server.
@@ -60,6 +59,12 @@ func (c *Config) Validate() error {
 		if c.Logger == nil {
 			c.Logger = log.Default()
 		}
+	}
+	if c.DeniedStatusCode == 0 {
+		c.DeniedStatusCode = http.StatusForbidden
+	}
+	if c.DeniedMessage == "" {
+		c.DeniedMessage = "Forbidden"
 	}
 	if c.Timeout == 0 {
 		c.Timeout = 10 * time.Second

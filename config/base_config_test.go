@@ -1,7 +1,6 @@
 package config
 
 import (
-	"github.com/open-policy-agent/opa/rego"
 	"log"
 	"net/http"
 	"testing"
@@ -12,7 +11,6 @@ func TestConfig_Validate(t *testing.T) {
 	type fields struct {
 		URL                 string
 		Policy              string
-		instantiatedPolicy  *rego.PreparedEvalQuery
 		Query               string
 		InputCreationMethod func(r *http.Request) (map[string]interface{}, error)
 		ExceptedResult      bool
@@ -110,7 +108,6 @@ func TestConfig_Validate(t *testing.T) {
 			c := &Config{
 				URL:                 tt.fields.URL,
 				Policy:              tt.fields.Policy,
-				instantiatedPolicy:  tt.fields.instantiatedPolicy,
 				Query:               tt.fields.Query,
 				InputCreationMethod: tt.fields.InputCreationMethod,
 				ExceptedResult:      tt.fields.ExceptedResult,
