@@ -99,6 +99,7 @@ allow {
 		want    bool
 		wantErr bool
 	}{
+		// TODO: Fix this test and add more
 		/*
 			{
 				name: "query url should return true",
