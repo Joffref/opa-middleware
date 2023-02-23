@@ -55,10 +55,8 @@ type Config struct {
 }
 
 func (c *Config) Validate() error {
-	if c.Debug {
-		if c.Logger == nil {
-			c.Logger = log.Default()
-		}
+	if c.Debug && c.Logger == nil {
+		c.Logger = log.Default()
 	}
 	if c.DeniedStatusCode == 0 {
 		c.DeniedStatusCode = http.StatusForbidden

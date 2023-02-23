@@ -25,10 +25,8 @@ func NewFiberMiddleware(cfg *config.Config, input FiberInputCreationMethod) (*Fi
 	if err != nil {
 		return nil, err
 	}
-	if input == nil {
-		if cfg.InputCreationMethod == nil {
-			return nil, errors.New("[opa-middleware-fiber] InputCreationMethod must be provided")
-		}
+	if input == nil && cfg.InputCreationMethod == nil {
+		return nil, errors.New("[opa-middleware-fiber] InputCreationMethod must be provided")
 	}
 	return &FiberMiddleware{
 		Config:              cfg,
