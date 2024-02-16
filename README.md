@@ -1,6 +1,6 @@
 # Open Policy Agent Middleware
 
-This middleware integrates Open Policy Agent (OPA) to your http/gin/fiber app.
+This middleware integrates Open Policy Agent (OPA) to your http/gin/fiber/echo app.
 You can use it to enforce policies on endpoints.
 You can use OPA as local policy engine, or as a remote policy engine.
 
@@ -199,5 +199,47 @@ func main() {
 		return nil
 	})
 	app.Listen(":8080")
+}
+```
+
+## Usage with Echo
+```go
+package main
+
+import (
+	"github.com/Joffref/opa-middleware"
+	"github.com/Joffref/opa-middleware/config"
+	"github.com/labstack/echo/v4"
+)
+
+func main() {
+	e := echo.New()
+	middleware, err := opamiddleware.NewEchoMiddleware(
+		&config.Config{
+			URL:           "http://localhost:8181/",
+			Query:            "data.policy.allow",
+			ExceptedResult:   true,
+			DeniedStatusCode: 403,
+			DeniedMessage:    "Forbidden",
+		},
+		func(c echo.Context) (map[string]interface{}, error) {
+			return map[string]interface{}{
+				"path":   c.Path(),
+				"method": c.Request().Method,
+			}, nil
+		},
+	)
+	if err != nil {
+		return
+	}
+	e.Use(middleware.Use())
+	e.GET("/ping", func(c echo.Context) error {
+		err := c.JSON(200, "pong")
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	e.Start(":8080")
 }
 ```
