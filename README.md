@@ -224,7 +224,7 @@ func main() {
 		},
 		func(c echo.Context) (map[string]interface{}, error) {
 			return map[string]interface{}{
-				"path":   c.Path(),
+				"path":   c.Request().URL.Path,
 				"method": c.Request().Method,
 			}, nil
 		},
